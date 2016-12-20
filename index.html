@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>To Do List by h@fDevs</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+
+    <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+
+    <script>
+        function addItem() 
+    {
+        if(document.getElementById("ToDoItem").value != "")
+        {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() 
+            {
+                if (this.readyState == 4 && this.status == 200) 
+                {
+                    addSingleItem(document.getElementById("ToDoItem").value, this.responseText);
+					document.getElementById("ToDoItem").value = "";
+					document.getElementById("ToDoItem").setAttribute("placeholder","");
+                }
+            };
+            xhttp.open("POST", "http://api.fdevs.com/ToDoItems/Create", true);
+            xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhttp.send("APIKey="+document.getElementById("APIKey").value+"&ToDoItem="+document.getElementById("ToDoItem").value);
+            
+            
+        }
+        else
+        {
+            document.getElementById("ToDoItem").setAttribute("placeholder","To Do Item cannot be empty!");
+        }
+        
+    }
+    </script>
+
+    <script>
+        function getAllItems() 
+    {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() 
+        {
+            if (this.readyState == 4 && this.status == 200) {
+                var allItems = JSON.parse(this.responseText);
+                console.log(allItems);
+                console.log(allItems.length);
+                updateAllItemsOnToDoList(allItems)
+                
+            }
+        };
+        xhttp.open("GET", "http://api.fdevs.com/ToDoItems?APIKey=1EFAC4C4-583D-448C-A4C9-C56FD5671F73", true);
+        xhttp.send();
+    }
+    </script>
+
+    <script>
+        function updateAllItemsOnToDoList(allItems)
+    {
+        var ul = document.getElementById("list");
+        while (ul.firstChild) 
+        {
+           ul.removeChild(ul.firstChild);
+        }
+        for(var i = 0; i < allItems.length; ++i)
+        {
+            addSingleItem(allItems[i].ToDoItem, allItems[i].ToDoItemId,allItems[i].IsCompleted)
+        }
+    }
+    </script>
+    <script>
+    function addSingleItem(ToDoItem,ToDoItemId,IsCompleted)
+    {
+        console.log("Is Completed?:" + IsCompleted);
+        var ul = document.getElementById("list");
+        var li = document.createElement("li");
+        var a = document.createElement("a");
+        var children = ul.children.length + 1
+        a.setAttribute("href","#ItemDetails");
+        a.setAttribute("id", ToDoItemId)
+        a.addEventListener("click", setDetailModal);
+        a.appendChild(document.createTextNode(ToDoItem));
+        if(IsCompleted == true)
+        {
+            li.setAttribute("style","background-color:#008800");
+        }
+        li.appendChild(a);
+        ul.insertBefore(li,ul.childNodes[0])
+        
+    }
+    </script>
+    
+    <script>
+    function setDetailModal(event)
+    {
+        document.getElementById("ToDoItemDetail").innerHTML = document.getElementById(event.target.id).innerHTML;
+        document.getElementById("completeItem").setAttribute("onclick","completeItem("+event.target.id+")")
+        document.getElementById("archiveItem").setAttribute("onclick","archiveItem("+event.target.id+")")
+    }    
+    </script>
+    <script>
+        function completeItem(ToDoItemId)
+        {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() 
+            {
+                if (this.readyState == 4 && this.status == 200) 
+                {
+					getAllItems();
+                    document.getElementsByClassName("close")[0].click();
+                }
+            };
+            xhttp.open("POST", "http://api.fdevs.com/ToDoItems/Edit", true);
+            xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhttp.send("APIKey="+document.getElementById("APIKey").value+"&id="+ToDoItemId+"&isCompleted=True");
+			
+        }
+        function archiveItem(ToDoItemId)
+        {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() 
+            {
+                if (this.readyState == 4 && this.status == 200) 
+                {
+					getAllItems();
+                    document.getElementsByClassName("close")[0].click();
+                }
+            };
+            xhttp.open("POST", "http://api.fdevs.com/ToDoItems/Edit", true);
+            xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhttp.send("APIKey="+document.getElementById("APIKey").value+"&id="+ToDoItemId+"&isArchived=True");
+            
+			
+
+        }
+    </script>
+        
+    
+    <style>
+        #header nav ul {
+            -moz-flex-direction: column;
+            -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            min-width: 10rem;
+            max-width: 100%;
+        }
+        
+        #header nav ul li {
+            border-left: 0;
+            border-top: solid 1px #ffffff;
+        }
+        
+        #header nav.use-middle:after {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <header id="header">
+            <div class="content">
+                <div class="inner">
+                    <h1 class="major">Things to do..</h1>
+
+                    <div class="field">
+                        <label for="ToDoItem">Add an item</label>
+                        <input type="hidden" name="APIKey" id="APIKey" value="1EFAC4C4-583D-448C-A4C9-C56FD5671F73" />
+                        <input type="text" name="ToDoItem" id="ToDoItem" style="float:left;width:75%;" />
+                        <button style="width:25%;" onclick="addItem()">Add</button>
+                    </div>
+
+                </div>
+            </div>
+            <nav>
+                <ul id="list">
+                    <li><a href="#intro">Loading...</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <div id="main">
+
+            <!-- Intro -->
+            <article id="ItemDetails">
+                <h2 class="major" id="ToDoItemDetail">Intro</h2>
+                <p><button style="width:50%;" onclick="completeItem()" id="completeItem">Complete</button></p>
+                <p><button style="width:50%;" onclick="archiveItem()" id="archiveItem">Archive</button></p>
+            </article>
+        </div>
+
+
+        <footer id="footer">
+            <p class="copyright">&copy; fDevs. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+        </footer>
+
+    </div>
+    <div id="bg"></div>
+
+
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/skel.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <script>
+        (function() {
+    getAllItems();
+})();
+
+    </script>
+</body>
+
+</html>
