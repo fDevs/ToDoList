@@ -1571,7 +1571,8 @@
 
 		#footer .copyright {
 			letter-spacing: 0.2rem;
-			font-size: 0.6rem;
+			font-size: 1rem;
+			color: blue;
 			opacity: 0.75;
 			margin-bottom: 0;
 			text-transform: uppercase;
