@@ -13,6 +13,7 @@
 
 
     <script>
+	//"Add an item" box
         function addItem() 
     {
         if(document.getElementById("ToDoItem").value != "")
@@ -40,8 +41,10 @@
         
     }
     </script>
+	
 
     <script>
+	//Displays non-archived items in the list	
         function getAllItems() 
     {
         var xhttp = new XMLHttpRequest();
@@ -60,7 +63,9 @@
     }
     </script>
 
+
     <script>
+	//Creates the list
         function updateAllItemsOnToDoList(allItems)
     {
         var ul = document.getElementById("list");
@@ -74,7 +79,9 @@
         }
     }
     </script>
+	
     <script>
+	//Adds new item and checks for item completion
     function addSingleItem(ToDoItem,ToDoItemId,IsCompleted)
     {
         console.log("Is Completed?:" + IsCompleted);
@@ -97,6 +104,7 @@
     </script>
     
     <script>
+	//Sets detail of item
     function setDetailModal(event)
     {
         document.getElementById("ToDoItemDetail").innerHTML = document.getElementById(event.target.id).innerHTML;
@@ -104,7 +112,9 @@
         document.getElementById("archiveItem").setAttribute("onclick","archiveItem("+event.target.id+")")
     }    
     </script>
+	
     <script>
+	//Sets item as complete
         function completeItem(ToDoItemId)
         {
             var xhttp = new XMLHttpRequest();
