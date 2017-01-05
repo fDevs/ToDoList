@@ -52,8 +52,9 @@
         {
             if (this.readyState == 4 && this.status == 200) {
                 var allItems = JSON.parse(this.responseText);
-                console.log(allItems);
-                console.log(allItems.length);
+                console.log(allItems[0]);
+                console.log(allItems[0].ToDoItems);
+				console.log(allItems[0].ToDoItemDetails);
                 updateAllItemsOnToDoList(allItems)
                 
             }
@@ -75,14 +76,15 @@
         }
         for(var i = 0; i < allItems.length; ++i)
         {
-            addSingleItem(allItems[i].ToDoItem, allItems[i].ToDoItemId,allItems[i].IsCompleted)
+			var description = allItems[i].ToDoItemDetails.Description == null ? "" : allItems[i].ToDoItemDetails.Description;
+            addSingleItem(allItems[i].ToDoItems.ToDoItem, allItems[i].ToDoItems.ToDoItemId,allItems[i].ToDoItems.IsCompleted, description)
         }
     }
     </script>
 	
     <script>
 	//Adds new item and checks for item completion
-    function addSingleItem(ToDoItem,ToDoItemId,IsCompleted)
+    function addSingleItem(ToDoItem,ToDoItemId,IsCompleted,ToDoItemDescription)
     {
         console.log("Is Completed?:" + IsCompleted);
         var ul = document.getElementById("list");
@@ -91,6 +93,7 @@
         var children = ul.children.length + 1
         a.setAttribute("href","#ItemDetails");
         a.setAttribute("id", ToDoItemId)
+		a.setAttribute("description", ToDoItemDescription)
         a.addEventListener("click", setDetailModal);
         a.appendChild(document.createTextNode(ToDoItem));
         if(IsCompleted == true)
@@ -107,7 +110,8 @@
 	//Sets detail of item
     function setDetailModal(event)
     {
-        document.getElementById("ToDoItemDetail").innerHTML = document.getElementById(event.target.id).innerHTML;
+        document.getElementById("description").value = document.getElementById(event.target.id).getAttribute("description");
+		document.getElementById("updateDescription").setAttribute("onclick","updateDescription("+event.target.id+")")
         document.getElementById("completeItem").setAttribute("onclick","completeItem("+event.target.id+")")
         document.getElementById("archiveItem").setAttribute("onclick","archiveItem("+event.target.id+")")
     }    
@@ -145,6 +149,25 @@
             xhttp.open("POST", "http://api.fdevs.com/ToDoItems/Edit", true);
             xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhttp.send("APIKey="+document.getElementById("APIKey").value+"&id="+ToDoItemId+"&isArchived=True");
+            
+			
+
+        }
+		
+		function updateDescription(ToDoItemId)
+        {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() 
+            {
+                if (this.readyState == 4 && this.status == 200) 
+                {
+					getAllItems();
+                    document.getElementsByClassName("close")[0].click();
+                }
+            };
+            xhttp.open("POST", "http://api.fdevs.com/ToDoItems/Edit", true);
+            xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhttp.send("APIKey="+document.getElementById("APIKey").value+"&id="+ToDoItemId+"&description="+encodeURIComponent(document.getElementById("description").value));
             
 			
 
@@ -202,7 +225,9 @@
 
             <!-- Intro -->
             <article id="ItemDetails">
-                <h2 class="major" id="ToDoItemDetail">Intro</h2>
+			<label>Description</label>
+                <input type="text" class="major" id="description"/>
+				<p><button style="width:50%;" onclick="updateDescription()" id="updateDescription">Update Description</button></p>
                 <p><button style="width:50%;" onclick="completeItem()" id="completeItem">Complete</button></p>
                 <p><button style="width:50%;" onclick="archiveItem()" id="archiveItem">Archive</button></p>
             </article>
