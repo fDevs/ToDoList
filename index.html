@@ -5,12 +5,15 @@
     <title>To Do List by h@fDevs</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" href="assets/css/main.css" />
+    <link rel="stylesheet" href="loading.css" />
+	<link rel="stylesheet" href="assets/css/main.css" />
+	<link rel="stylesheet" href="assets/css/custom.css" />
 
     <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 
 
     <script>
+	//"Add an item" box
         function addItem() 
     {
         if(document.getElementById("ToDoItem").value != "")
@@ -38,8 +41,10 @@
         
     }
     </script>
+	
 
     <script>
+	//Displays non-archived items in the list	
         function getAllItems() 
     {
         var xhttp = new XMLHttpRequest();
@@ -47,8 +52,9 @@
         {
             if (this.readyState == 4 && this.status == 200) {
                 var allItems = JSON.parse(this.responseText);
-                console.log(allItems);
-                console.log(allItems.length);
+                console.log(allItems[0]);
+                console.log(allItems[0].ToDoItems);
+				console.log(allItems[0].ToDoItemDetails);
                 updateAllItemsOnToDoList(allItems)
                 
             }
@@ -58,7 +64,9 @@
     }
     </script>
 
+
     <script>
+	//Creates the list
         function updateAllItemsOnToDoList(allItems)
     {
         var ul = document.getElementById("list");
@@ -68,12 +76,15 @@
         }
         for(var i = 0; i < allItems.length; ++i)
         {
-            addSingleItem(allItems[i].ToDoItem, allItems[i].ToDoItemId,allItems[i].IsCompleted)
+			var description = allItems[i].ToDoItemDetails.Description == null ? "" : allItems[i].ToDoItemDetails.Description;
+            addSingleItem(allItems[i].ToDoItems.ToDoItem, allItems[i].ToDoItems.ToDoItemId,allItems[i].ToDoItems.IsCompleted, description)
         }
     }
     </script>
+	
     <script>
-    function addSingleItem(ToDoItem,ToDoItemId,IsCompleted)
+	//Adds new item and checks for item completion
+    function addSingleItem(ToDoItem,ToDoItemId,IsCompleted,ToDoItemDescription)
     {
         console.log("Is Completed?:" + IsCompleted);
         var ul = document.getElementById("list");
@@ -82,6 +93,7 @@
         var children = ul.children.length + 1
         a.setAttribute("href","#ItemDetails");
         a.setAttribute("id", ToDoItemId)
+		a.setAttribute("description", ToDoItemDescription)
         a.addEventListener("click", setDetailModal);
         a.appendChild(document.createTextNode(ToDoItem));
         if(IsCompleted == true)
@@ -95,14 +107,18 @@
     </script>
     
     <script>
+	//Sets detail of item
     function setDetailModal(event)
     {
-        document.getElementById("ToDoItemDetail").innerHTML = document.getElementById(event.target.id).innerHTML;
+        document.getElementById("description").value = document.getElementById(event.target.id).getAttribute("description");
+		document.getElementById("updateDescription").setAttribute("onclick","updateDescription("+event.target.id+")")
         document.getElementById("completeItem").setAttribute("onclick","completeItem("+event.target.id+")")
         document.getElementById("archiveItem").setAttribute("onclick","archiveItem("+event.target.id+")")
     }    
     </script>
+	
     <script>
+	//Sets item as complete
         function completeItem(ToDoItemId)
         {
             var xhttp = new XMLHttpRequest();
@@ -133,6 +149,25 @@
             xhttp.open("POST", "http://api.fdevs.com/ToDoItems/Edit", true);
             xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhttp.send("APIKey="+document.getElementById("APIKey").value+"&id="+ToDoItemId+"&isArchived=True");
+            
+			
+
+        }
+		
+		function updateDescription(ToDoItemId)
+        {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() 
+            {
+                if (this.readyState == 4 && this.status == 200) 
+                {
+					getAllItems();
+                    document.getElementsByClassName("close")[0].click();
+                }
+            };
+            xhttp.open("POST", "http://api.fdevs.com/ToDoItems/Edit", true);
+            xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhttp.send("APIKey="+document.getElementById("APIKey").value+"&id="+ToDoItemId+"&description="+encodeURIComponent(document.getElementById("description").value));
             
 			
 
@@ -181,7 +216,7 @@
             </div>
             <nav>
                 <ul id="list">
-                    <li><a href="#intro">Loading...</a></li>
+                    <li><a href="#intro"> <div class='uil-ellipsis-css' style='transform:scale(0.37);'><div class="ib"><div class="circle"><div></div></div><div class="circle"><div></div></div><div class="circle"><div></div></div><div class="circle"><div></div></div></div></div></a></li>
                 </ul>
             </nav>
         </header>
@@ -190,7 +225,9 @@
 
             <!-- Intro -->
             <article id="ItemDetails">
-                <h2 class="major" id="ToDoItemDetail">Intro</h2>
+			<label>Description</label>
+                <input type="text" class="major" id="description"/>
+				<p><button style="width:50%;" onclick="updateDescription()" id="updateDescription">Update Description</button></p>
                 <p><button style="width:50%;" onclick="completeItem()" id="completeItem">Complete</button></p>
                 <p><button style="width:50%;" onclick="archiveItem()" id="archiveItem">Archive</button></p>
             </article>
@@ -198,7 +235,7 @@
 
 
         <footer id="footer">
-            <p class="copyright">&copy; fDevs. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+            <p class="copyright">&copy; 2017 fDevs. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
         </footer>
 
     </div>
