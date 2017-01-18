@@ -154,6 +154,17 @@
 
         }
 		
+		function changeDescription() 
+		{	//on click changes label to input
+			var label = document.getElementById("description");
+			var input = document.createElement("input");
+			input.setAttribute("type","text");
+			input.setAttribute("id","description");
+			input.value = label.innerHTML;
+			label.parentNode.replaceChild(input,label);
+			document.getElementById("updateDescription").setAttribute("style","visibility:show");
+		}
+			
 		function updateDescription(ToDoItemId)
         {
             var xhttp = new XMLHttpRequest();
@@ -168,7 +179,21 @@
             xhttp.open("POST", "http://api.fdevs.com/ToDoItems/Edit", true);
             xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhttp.send("APIKey="+document.getElementById("APIKey").value+"&id="+ToDoItemId+"&description="+encodeURIComponent(document.getElementById("description").value));
-            
+        
+			
+				
+			if (document.getElementById("description").value != null || document.getElementById("description").value != "")
+			{	
+				// If the input has a value, changes to a label element and removes update buttpn
+				var input = document.getElementById("description");
+				var label = document.createElement("label");
+				label.setAttribute("for","description");
+				label.setAttribute("id","description");
+				label.setAttribute("onclick","changeDescription()");
+				label.innerHTML = input.value;
+				input.parentNode.replaceChild(label,input);
+				document.getElementById("updateDescription").setAttribute("style","visibility:hidden")
+			}
 			
 
         }
